@@ -1,0 +1,30 @@
+---
+- name: Update GRUB configurations on Fedora 40
+  hosts: all
+  become: yes
+  tasks:
+    - name: Remove 'nomodeset' and add 'amdgpu.dc=1 radeon.si_support=0 amdgpu.si_support=1' to kernel arguments
+      command: >
+        grubby --remove-args="nomodeset" --args="amdgpu.dc=1 radeon.si_support=0 amdgpu.si_support=1" --update-kernel=ALL
+      register: grubby_output
+
+    - name: Debug grubby output
+      debug:
+        var: grubby_output
+
+    - name: Generate new GRUB configuration file for BIOS systems
+      command: grub2-mkconfig -o /etc/grub2.cfg
+      register: grub2_bios_output
+
+    - name: Debug GRUB BIOS output
+      debug:
+        var: grub2_bios_output
+
+    - name: Generate new GRUB configuration file for EFI systems
+      command: grub2-mkconfig -o /etc/grub2-efi.cfg
+      register: grub2_efi_output
+
+    - name: Debug GRUB EFI output
+      debug:
+        var: grub2_efi_output
+
